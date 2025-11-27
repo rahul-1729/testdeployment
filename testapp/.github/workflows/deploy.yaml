@@ -1,0 +1,35 @@
+name: Deploy React App to GitHub Pages (Manual)
+
+on:
+  workflow_dispatch:  # Manual trigger only
+
+permissions:
+  contents: write  # Required to push deployment
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20  # or 18 depending on your project
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Build React Project
+        run: npm run build
+
+      # OPTIONAL - ensures correct SPA routing on GitHub Pages
+      - name: Add 404 redirect for SPA routing
+        run: cp build/index.html build/404.html
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          publish_dir: ./build
