@@ -1,0 +1,48 @@
+name: Deploy React App to GitHub Pages (Manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_branch:
+        description: "Select branch to deploy"
+        required: true
+        default: "main"
+        type: choice
+        options:
+          - main
+          - dev
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        # with:
+          # ref: ${{ github.event.inputs.target_branch }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Build React Project
+        run: npm run build
+
+      - name: Add 404 fallback for SPA
+        run: cp build/index.html build/404.html
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          publish_dir: ./build
+          # Deploy to separate Pages branches depending on main/dev
+          # publish_branch: ${{ github.event.inputs.target_branch == 'main' && 'gh-pages' || 'gh-pages-dev' }}
+          # github_token: ${{ secrets.GITHUB_TOKEN }}
